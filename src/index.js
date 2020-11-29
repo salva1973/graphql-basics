@@ -1,9 +1,48 @@
 import { GraphQLServer } from 'graphql-yoga'
 
+// Scalar types - String, Boolean, Int, Float, ID
+
+// Demo users data
+const users = [{
+    id: '1',
+    name: 'Salva',
+    email: 'salva@example.com',
+    age: 47
+}, {
+    id :'2',
+    name: 'Sarah',
+    email: 'salah@example.com'
+},
+{
+    id :'3',
+    name: 'Mike',
+    email: 'mike@example.com'
+}]
+
+// Demo posts data
+const posts = [{
+    id: '1',
+    title: 'GraphQL 101',
+    body: 'Best course ever',
+    published: true
+}, {
+    id :'2',
+    title: 'SwiftUI 101',
+    body: 'To be completed',
+    published: false
+},
+{
+    id :'3',
+    title: 'MongoDB 101',
+    body: 'To be completed',
+    published: false
+}]
+
 // Type definitions (application schema)
 const typeDefs = `
      type Query {
-         greeting(name: String): String!
+         users(query: String): [User!]!
+         posts(query: String): [Post!]!
          me: User!
          post: Post!
      }
@@ -26,12 +65,27 @@ const typeDefs = `
 // Resolvers for the API
 const resolvers = {
     Query: {
-        greeting(parent, args, ctx, info) {
-            if (args.name) {
-                return `Hello, ${args.name}!`
-            } else {
-                return 'Hello!'
+        users(parent, args, ctx, info) {
+            if (!args.query) {
+                return users
             }
+
+            return users.filter((user) => {
+                return user.name.toLowerCase().includes(args.query.toLowerCase())
+            })
+            
+        },
+        posts(parent, args, ctx, info) {
+            if (!args.query) {
+                return posts
+            }
+            
+            return posts.filter((post) => {
+                const isTitleMatch = post.title.toLowerCase().includes(args.query.toLowerCase())
+                const isBodyMatch = post.body.toLowerCase().includes(args.query.toLowerCase())
+                return isTitleMatch || isBodyMatch                
+            })
+
         },
         me() {
             return {
